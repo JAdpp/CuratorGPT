@@ -48,23 +48,21 @@
                     alert('Please enter your OpenAI API key');
                 } else if (userInput === '') {
                     alert('Please enter the artist, artistic concept or subject of interest you would like to learn more about');
-                }else {
+                } else {
                     $("#result").empty(); // Clear the contents of the results box
                     $(".spinner-border").show(); // Show loading animation
                     $(".loading-text").show(); // Show loading text
 
                     $.ajax({
-                        url: '/api/proxy',
+                        url: 'https://api.openai.com/v1/chat/completions',
                         type: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'x-api-key': apiKey
+                            'Authorization': 'Bearer ' + apiKey
                         },
                         data: JSON.stringify({
                             "model": "gpt-3.5-turbo-0301",
-                            'messages': [{'role': 'system', 'content': 'You play a professional museum curator.'},
-                                         {'role': 'user', 'content': prompt},
-                                         /*{'role': 'assistant', 'content': 'The Starry Night\nThe Starry Night is one of Van Gogh\'s most famous works, showing a starry sky full of life and vitality. The painting is set against a deep blue sky in which the stars and moon twinkle. The village and the trees in the scene are brought to life with Van Gogh\'s distinctive brushwork, making the whole picture full of life and vitality. The painting was painted by Van Gogh in 1889 in Saint-Rémy and is now in the collection of the Museum of Modern Art in New York. \n link to the collection: https://www.moma.org/collection/works/79802'}*/],
+                            'prompt': prompt,
                             'max_tokens': 3500,
                             'temperature': 0
                         }),
@@ -73,18 +71,13 @@
                             $(".loading-text").hide(); // Hide loading text
                             console.log(response);
                             if (response.choices && response.choices.length > 0) {
-                                var generatedText = response.choices[0].message.content;
+                                var generatedText = response.choices[0].text;
                                 var formattedText = generatedText.replace(/\n/g, '<br>'); // Replace line breaks with HTML <br> tags
                                 $("#result").html(formattedText);
                             } else {
                                 alert('Failed to generate a virtual exhibition route, please try again later.');
                             }
                         },
-                        /*success: function(response) {
-                            console.log(response);
-                            var generatedText = response.choices[0].message.content;
-                            $("#result").html(generatedText);
-                        },*/
                         error: function() {
                             $(".spinner-border").hide(); // Hide loading animation
                             $(".loading-text").hide(); // Hide loading text

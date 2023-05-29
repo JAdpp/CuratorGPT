@@ -6,7 +6,7 @@
     <title>CuartorGPT</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="static/styles.css">
     <!-- jQuery, Popper.js, and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
@@ -58,7 +58,8 @@
                         type: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + apiKey
+                            'Authorization': 'Bearer ' + apiKey,
+                            'Origin': 'https://jadpp.github.io/CuratorGPT/'
                         },
                         data: JSON.stringify({
                             "model": "gpt-3.5-turbo-0301",

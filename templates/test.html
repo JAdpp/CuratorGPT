@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuartorGPT</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- jQuery, Popper.js, and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">CuartorGPT</h1>
+        <h2 class="mb-3">An AI guide take you to a personalised virtual exhibition</h2>
+        <form>
+            <div class="form-group">
+                <label for="api_key">Please enter your OpenAI API key</label>
+                <input type="password" class="form-control" id="api_key" placeholder="Please enter your OpenAI API key">
+            </div>
+            <div class="form-group">
+                <label for="user_input">Please enter the artist, artistic concept or whatever theme you would like to learn about</label>
+                <input type="text" class="form-control" id="user_input" placeholder="e.g. Van Gogh, Impressionists">
+            </div>
+            <button type="button" class="btn btn-primary" id="submit">Generate an exhibition</button>
+        </form>
+        <h2 class="mt-4 mb-3">Your virtual art exhibition</h2>
+        <div class="spinner-border" role="status">
+            <span class="sr-only">loading...</span>
+        </div>
+        <div class="loading-text" style="display: none;">The exhibition is being generated...</div>
+        <div id="result">
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $(".spinner-border").hide(); // Hide loading animation
+            $(".loading-text").hide(); // Hide loading text
+            $("#submit").click(function() {
+                var apiKey = $("#api_key").val();
+                var userInput = $("#user_input").val();
+                var prompt = 'You are asked to plan and generate a virtual exhibition which has at least 10 objects about' + userInput +'. Write a overall introduction and conclusion and describe each piece of the collection in vocal detail and give a link to a web page pointing to that collection.You don\'t need to apologize.';
+                if (apiKey === '') {
+                    alert('Please enter your OpenAI API key');
+                } else if (userInput === '') {
+                    alert('Please enter the artist, artistic concept or subject of interest you would like to learn more about');
+                }else {
+                    $("#result").empty(); // Clear the contents of the results box
+                    $(".spinner-border").show(); // Show loading animation
+                    $(".loading-text").show(); // Show loading text
+
+                    $.ajax({
+                        url: '/api/proxy',
+                        type: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': apiKey
+                        },
+                        data: JSON.stringify({
+                            "model": "gpt-3.5-turbo-0301",
+                            'messages': [{'role': 'system', 'content': 'You play a professional museum curator.'},
+                                         {'role': 'user', 'content': prompt},
+                                         /*{'role': 'assistant', 'content': 'The Starry Night\nThe Starry Night is one of Van Gogh\'s most famous works, showing a starry sky full of life and vitality. The painting is set against a deep blue sky in which the stars and moon twinkle. The village and the trees in the scene are brought to life with Van Gogh\'s distinctive brushwork, making the whole picture full of life and vitality. The painting was painted by Van Gogh in 1889 in Saint-Rémy and is now in the collection of the Museum of Modern Art in New York. \n link to the collection: https://www.moma.org/collection/works/79802'}*/],
+                            'max_tokens': 3500,
+                            'temperature': 0
+                        }),
+                        success: function(response) {
+                            $(".spinner-border").hide(); // Hide loading animation
+                            $(".loading-text").hide(); // Hide loading text
+                            console.log(response);
+                            if (response.choices && response.choices.length > 0) {
+                                var generatedText = response.choices[0].message.content;
+                                var formattedText = generatedText.replace(/\n/g, '<br>'); // Replace line breaks with HTML <br> tags
+                                $("#result").html(formattedText);
+                            } else {
+                                alert('Failed to generate a virtual exhibition route, please try again later.');
+                            }
+                        },
+                        /*success: function(response) {
+                            console.log(response);
+                            var generatedText = response.choices[0].message.content;
+                            $("#result").html(generatedText);
+                        },*/
+                        error: function() {
+                            $(".spinner-border").hide(); // Hide loading animation
+                            $(".loading-text").hide(); // Hide loading text
+                            alert('API call failed, please check your API key');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
